@@ -1,88 +1,90 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { EmailInput } from '@/components/EmailInput';
+import { AnalysisView } from '@/components/AnalysisView';
+import { parseEmailFile, parseEmailText } from '@/lib/email-parser';
+import { EmailAnalysis } from '@/types/email';
+import { AlertCircle } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { trackEvent } from '@/components/GoogleAnalytics';
+import { Header } from '@/components/Header';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [analysis, setAnalysis] = useState<EmailAnalysis | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleFileUpload = async (file: File) => {
+    setIsProcessing(true);
+    setError(null);
+    trackEvent('email_analysis', 'file_upload', 'started');
+    try {
+      const result = await parseEmailFile(file);
+      setAnalysis(result);
+      trackEvent('email_analysis', 'file_upload', 'success');
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to parse email file';
+      setError(errorMsg);
+      setAnalysis(null);
+      trackEvent('email_analysis', 'file_upload', 'error', 1);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleTextSubmit = async (text: string) => {
+    setIsProcessing(true);
+    setError(null);
+    trackEvent('email_analysis', 'header_paste', 'started');
+    try {
+      const result = await parseEmailText(text);
+      setAnalysis(result);
+      trackEvent('email_analysis', 'header_paste', 'success');
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to parse email headers';
+      setError(errorMsg);
+      setAnalysis(null);
+      trackEvent('email_analysis', 'header_paste', 'error', 1);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Email Header Analyzer
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Parse and analyze email headers to check authentication, routing, and security information
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+
+        <div className="space-y-6">
+          <EmailInput
+            onFileUpload={handleFileUpload}
+            onTextSubmit={handleTextSubmit}
+            isProcessing={isProcessing}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+          {error && (
+            <Card className="border-destructive">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 text-destructive">
+                  <AlertCircle className="h-5 w-5" />
+                  <span>{error}</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {analysis && <AnalysisView analysis={analysis} />}
+        </div>
+      </div>
     </div>
   );
 }

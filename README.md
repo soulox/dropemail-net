@@ -40,6 +40,20 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+### Configure Google Analytics (Optional)
+
+To enable traffic tracking:
+
+1. Get your Google Analytics 4 (GA4) Measurement ID (format: `G-XXXXXXXXXX`)
+2. Create a `.env.local` file in the root directory
+3. Add your Measurement ID:
+   ```env
+   NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+   ```
+4. Restart the development server
+
+Google Analytics will automatically track page views and user interactions.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
