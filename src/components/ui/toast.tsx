@@ -73,6 +73,7 @@ export function useToast() {
   // Return a no-op function if context is not available
   if (!context) {
     return {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       showToast: (_message: string, _type?: 'success' | 'error') => {
         // No-op: ToastProvider not available
       },

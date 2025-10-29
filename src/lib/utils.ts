@@ -83,7 +83,7 @@ export function decodeHeader(header: string): string {
         } else {
           // Node.js environment (API route) - use Buffer
           // Dynamic import for Buffer in Node.js environment
-          // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
           const NodeBuffer = require('buffer').Buffer;
           decoded = NodeBuffer.from(text, 'base64').toString('latin1');
         }
@@ -101,7 +101,7 @@ export function decodeHeader(header: string): string {
         }
         return decoded;
       } else if (encoding === 'Q') {
-        return text.replace(/_/g, ' ').replace(/=([0-9A-F]{2})/gi, (_, hex) => {
+        return text.replace(/_/g, ' ').replace(/=([0-9A-F]{2})/gi, (_match: string, hex: string) => {
           return String.fromCharCode(parseInt(hex, 16));
         });
       }

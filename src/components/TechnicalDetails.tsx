@@ -118,7 +118,7 @@ export function TechnicalDetails({ analysis }: TechnicalDetailsProps) {
                   try {
                     await navigator.clipboard.writeText(analysis.rawHeaders);
                     toast.showToast('Copied all headers to clipboard', 'success');
-                  } catch (err) {
+                  } catch {
                     toast.showToast('Failed to copy headers', 'error');
                   }
                 }}
@@ -239,7 +239,7 @@ export function TechnicalDetails({ analysis }: TechnicalDetailsProps) {
                     try {
                       await navigator.clipboard.writeText(ipAddresses.join('\n'));
                       toast.showToast(`Copied ${ipAddresses.length} IP addresses`, 'success');
-                    } catch (err) {
+                    } catch {
                       toast.showToast('Failed to copy IP addresses', 'error');
                     }
                   }}
@@ -275,7 +275,7 @@ export function TechnicalDetails({ analysis }: TechnicalDetailsProps) {
                     try {
                       await navigator.clipboard.writeText(uniqueDomains.join('\n'));
                       toast.showToast(`Copied ${uniqueDomains.length} domains`, 'success');
-                    } catch (err) {
+                    } catch {
                       toast.showToast('Failed to copy domains', 'error');
                     }
                   }}

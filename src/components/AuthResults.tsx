@@ -71,7 +71,9 @@ export function AuthResults({ analysis }: AuthResultsProps) {
           <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${getLabelColor(label)}`}></div>
           <span className="font-semibold text-gray-900 dark:text-gray-100">{label}</span>
           {tooltip && (
-            <HelpCircle className="h-4 w-4 text-gray-500 dark:text-gray-400" title={tooltip} />
+            <span title={tooltip}>
+              <HelpCircle className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+            </span>
           )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">

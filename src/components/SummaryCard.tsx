@@ -151,7 +151,6 @@ export function SummaryCard({ analysis }: SummaryCardProps) {
               </Badge>
             </div>
             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
-              {/* eslint-disable-next-line react/forbid-dom-props */}
               <div
                 className={`h-full rounded-full transition-all duration-500 ${
                   securityScore.score === securityScore.max

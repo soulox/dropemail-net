@@ -1,6 +1,6 @@
 import { simpleParser, ParsedMail } from 'mailparser';
 import { NextRequest, NextResponse } from 'next/server';
-import { EmailAnalysis, EmailAddress, AuthResult, ReceivedHeader, SecurityAnalysis, Attachment } from '@/types/email';
+import { EmailAnalysis, EmailAddress, AuthResult, ReceivedHeader, SecurityAnalysis } from '@/types/email';
 import { parseEmailAddress, decodeHeader } from '@/lib/utils';
 
 export async function POST(request: NextRequest) {
@@ -30,7 +30,7 @@ async function parseEmailText(text: string): Promise<EmailAnalysis> {
   try {
     const parsed = await simpleParser(text);
     return analyzeEmail(parsed, text);
-  } catch (error) {
+  } catch {
     // If parsing fails, try parsing as headers only
     return parseHeadersOnly(text);
   }
@@ -141,6 +141,7 @@ function parseHeadersOnly(text: string): EmailAnalysis {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseAddresses(value: any): EmailAddress[] {
   if (!value) return [];
   if (typeof value === 'string') {
@@ -155,6 +156,7 @@ function parseAddresses(value: any): EmailAddress[] {
     });
   }
   if (value.value) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return value.value.map((v: any) => ({
       name: v.name,
       address: v.address,
@@ -163,6 +165,7 @@ function parseAddresses(value: any): EmailAddress[] {
   return [];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractAuthentication(headers: Map<string, any>): {
   spf: AuthResult;
   dkim: AuthResult;
@@ -174,6 +177,7 @@ function extractAuthentication(headers: Map<string, any>): {
   headers.forEach((value, key) => {
     if (key.toLowerCase() === 'authentication-results') {
       const values = Array.isArray(value) ? value : [value];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       values.forEach((v: any) => {
         authResults.push(String(v));
       });
@@ -193,7 +197,7 @@ function extractAuthentication(headers: Map<string, any>): {
     spf: extractSPF(authString, headersObj),
     dkim: extractDKIM(authString, headersObj),
     dmarc: extractDMARC(authString, headersObj),
-    arc: extractARC(authString, headersObj),
+    arc: extractARC(authString),
   };
 }
 
@@ -221,7 +225,7 @@ function extractAuthenticationFromHeaders(headers: Record<string, string | strin
     spf: extractSPF(authString, headers),
     dkim: extractDKIM(authString, headers),
     dmarc: extractDMARC(authString, headers),
-    arc: extractARC(authString, headers),
+    arc: extractARC(authString),
   };
 }
 
@@ -454,7 +458,7 @@ function extractDMARC(authString: string, headers: Record<string, string | strin
   return { status: 'none' };
 }
 
-function extractARC(authString: string, headers: Record<string, string | string[]>): AuthResult | undefined {
+function extractARC(authString: string): AuthResult | undefined {
   const arcMatch = authString.match(/arc=([^\s]+)/i);
   if (arcMatch) {
     return {
@@ -492,11 +496,13 @@ function normalizeStatus(status: string): AuthResult['status'] {
   return 'none';
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractRouting(headers: Map<string, any>): ReceivedHeader[] {
   const received: ReceivedHeader[] = [];
   headers.forEach((value, key) => {
     if (key.toLowerCase() === 'received') {
       const values = Array.isArray(value) ? value : [value];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       values.forEach((rec: any) => {
         const recStr = typeof rec === 'string' ? rec : String(rec);
         const parsed = parseReceivedHeader(recStr);
@@ -543,13 +549,14 @@ function parseReceivedHeader(header: string): ReceivedHeader | null {
       with: withMatch ? withMatch[1] : undefined,
       id: idMatch ? idMatch[1] : undefined,
       for: forMatch ? forMatch[1] : undefined,
-      timestamp,
+      timestamp: timestamp || new Date(),
     };
   } catch {
     return null;
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function analyzeSecurity(headers: Map<string, any> | Record<string, string | string[]>): SecurityAnalysis {
   const suspiciousPatterns: string[] = [];
   let tlsEncrypted = false;
@@ -561,6 +568,7 @@ function analyzeSecurity(headers: Map<string, any> | Record<string, string | str
     headers.forEach((value, key) => {
       if (key.toLowerCase() === 'received') {
         const values = Array.isArray(value) ? value : [value];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         values.forEach((rec: any) => {
           receivedHeaders.push(String(rec));
         });
