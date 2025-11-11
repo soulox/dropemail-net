@@ -42,13 +42,13 @@
   },
   "scripts": {
     "build": "next build",
-    "pages:build": "npm run build && npx @opennextjs/cloudflare",
+    "pages:build": "npx @opennextjs/cloudflare build",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv env.d.ts",
     "check": "npm run build && tsc",
     "deploy": "npm run pages:build && npx wrangler versions upload",
     "dev": "next dev",
     "lint": "next lint",
-    "preview": "npm run pages:build && npx wrangler versions deploy --experimental-versions",
+    "preview": "npx @opennextjs/cloudflare preview",
     "start": "next start"
   }
 }
