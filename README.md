@@ -1,22 +1,17 @@
-# Next.js Framework Starter
+# SafeCleanEmails.com - Email Header Analyzer
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/next-starter-template)
+A modern, clean email header analyzer that parses .eml files and raw email headers to display security, routing, and authentication information.
 
-<!-- dash-content-start -->
+This is a [Next.js](https://nextjs.org/) project deployed on Cloudflare Workers using [OpenNext](https://opennext.js.org/) via the [OpenNext Cloudflare adapter](https://opennext.js.org/cloudflare).
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app). It's deployed on Cloudflare Workers as a [static website](https://developers.cloudflare.com/workers/static-assets/).
+## Features
 
-This template uses [OpenNext](https://opennext.js.org/) via the [OpenNext Cloudflare adapter](https://opennext.js.org/cloudflare), which works by taking the Next.js build output and transforming it, so that it can run in Cloudflare Workers.
-
-<!-- dash-content-end -->
-
-Outside of this repo, you can start a new project with this template using [C3](https://developers.cloudflare.com/pages/get-started/c3/) (the `create-cloudflare` CLI):
-
-```bash
-npm create cloudflare@latest -- --template=cloudflare/templates/next-starter-template
-```
-
-A live public deployment of this template is available at [https://next-starter-template.templates.workers.dev](https://next-starter-template.templates.workers.dev)
+- Parse .eml files and raw email headers
+- Analyze SPF, DKIM, DMARC, and ARC authentication
+- Visualize email routing and hop information
+- Security analysis and spam scoring
+- Modern, responsive UI with dark mode support
+- Privacy-focused: All processing done client-side
 
 ## Getting Started
 

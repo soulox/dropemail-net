@@ -8,7 +8,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
       },
     ],
-    sitemap: 'https://dropemail.net/sitemap.xml',
+    sitemap: 'https://safecleanemails.com/sitemap.xml',
   }
 }
 

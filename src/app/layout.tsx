@@ -15,10 +15,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://dropemail.net"),
+  metadataBase: new URL("https://safecleanemails.com"),
   title: {
-    default: "Email Header Analyzer - DropEmail.net",
-    template: "%s | DropEmail.net",
+    default: "Email Header Analyzer - SafeCleanEmails.com",
+    template: "%s | SafeCleanEmails.com",
   },
   description:
     "Analyze email headers for SPF, DKIM, DMARC, ARC, routing hops, TLS, spam score, and security insights.",
@@ -47,13 +47,13 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://dropemail.net/",
+    canonical: "https://safecleanemails.com/",
   },
   openGraph: {
     type: "website",
-    url: "https://dropemail.net/",
-    siteName: "DropEmail.net",
-    title: "Email Header Analyzer - DropEmail.net",
+    url: "https://safecleanemails.com/",
+    siteName: "SafeCleanEmails.com",
+    title: "Email Header Analyzer - SafeCleanEmails.com",
     description:
       "Parse and analyze email headers to verify SPF, DKIM, DMARC, and visualize routing with security insights.",
     images: [
@@ -61,16 +61,16 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "DropEmail.net - Email Header Analyzer",
+        alt: "SafeCleanEmails.com - Email Header Analyzer",
       },
     ],
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    site: "@dropemail",
-    creator: "@dropemail",
-    title: "Email Header Analyzer - DropEmail.net",
+    site: "@safecleanemails",
+    creator: "@safecleanemails",
+    title: "Email Header Analyzer - SafeCleanEmails.com",
     description:
       "Analyze email headers (SPF, DKIM, DMARC) and routing with a modern UI.",
     images: ["/og-image.png"],
@@ -84,8 +84,8 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   category: "technology",
-  authors: [{ name: "DropEmail.net" }],
-  applicationName: "DropEmail Email Header Analyzer",
+  authors: [{ name: "SafeCleanEmails.com" }],
+  applicationName: "SafeCleanEmails Email Header Analyzer",
 };
 
 export default function RootLayout({
@@ -103,8 +103,8 @@ export default function RootLayout({
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'WebApplication',
-              name: 'DropEmail Email Header Analyzer',
-              url: 'https://dropemail.net',
+              name: 'SafeCleanEmails Email Header Analyzer',
+              url: 'https://safecleanemails.com',
               applicationCategory: 'SecurityApplication',
               operatingSystem: 'Web',
               description:
@@ -116,8 +116,8 @@ export default function RootLayout({
               },
               creator: {
                 '@type': 'Organization',
-                name: 'DropEmail.net',
-                url: 'https://dropemail.net',
+                name: 'SafeCleanEmails.com',
+                url: 'https://safecleanemails.com',
               },
             }),
           }}
