@@ -18,10 +18,10 @@ export function Header() {
             </div>
             <div className="flex flex-col">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                DropEmail
+                SafeCleanEmails
               </h1>
               <span className="text-xs text-gray-500 dark:text-gray-400 font-mono -mt-1">
-                dropemail.net
+                safecleanemails.com
               </span>
             </div>
           </Link>
