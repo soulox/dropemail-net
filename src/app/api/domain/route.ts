@@ -105,7 +105,6 @@ function getOrgDomain(d: string): string {
 function simulateDmarc({
 	domain,
 	spf,
-	dmarc: _dmarc,
 	headerFrom,
 	envelopeFrom,
 }: {

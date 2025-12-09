@@ -1,7 +1,5 @@
 'use client';
 
-// Shield and Search are used in conditional rendering (md:flex), but ESLint may not detect this
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Mail, Shield, Search } from 'lucide-react';
 import Link from 'next/link';
 
