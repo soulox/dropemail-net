@@ -2,8 +2,10 @@
 
 import { Mail, Shield, Search } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export function Header() {
+  const pathname = usePathname();
   return (
     <header className="border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-40 shadow-sm">
       <div className="container mx-auto px-4 py-4">
@@ -26,17 +28,29 @@ export function Header() {
             </div>
           </Link>
 
-          {/* Navigation/Tagline */}
-          <div className="hidden md:flex items-center gap-6">
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <Search className="h-4 w-4" />
-              <span>Email Header Analyzer</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <Shield className="h-4 w-4" />
-              <span>Security & Authentication</span>
-            </div>
-          </div>
+          {/* Navigation */}
+          <nav className="hidden md:flex items-center gap-3">
+            <Link
+              href="/"
+              className={`px-3 py-1.5 rounded-md text-sm ${
+                pathname === '/'
+                  ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
+                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+              }`}
+            >
+              Headers
+            </Link>
+            <Link
+              href="/domain"
+              className={`px-3 py-1.5 rounded-md text-sm ${
+                pathname?.startsWith('/domain')
+                  ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
+                  : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+              }`}
+            >
+              Domain
+            </Link>
+          </nav>
 
           {/* Mobile Menu (simple for now) */}
           <div className="md:hidden">
