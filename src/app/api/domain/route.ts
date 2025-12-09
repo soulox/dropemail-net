@@ -1104,7 +1104,7 @@ async function dnsResolveTxt(name: string): Promise<string[][]> {
 	return await retryOperation(() => withTimeout(dns.resolveTxt(name), TIMEOUTS.dnsMs), 2, 200);
 }
 
-async function dnsResolveMx(name: string): Promise<dns.MxRecord[]> {
+async function dnsResolveMx(name: string): Promise<Awaited<ReturnType<typeof dns.resolveMx>>> {
 	return await retryOperation(() => withTimeout(dns.resolveMx(name), TIMEOUTS.dnsMs), 2, 200);
 }
 
