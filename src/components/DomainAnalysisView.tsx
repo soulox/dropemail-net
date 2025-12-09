@@ -103,6 +103,12 @@ export function DomainAnalysisView({ result }: DomainAnalysisViewProps) {
 			<Card>
 				<CardContent className="p-6">
 					<h3 className="text-lg font-semibold mb-2">SMTP STARTTLS</h3>
+					{typeof result.starttls.confidenceFactor === 'number' && (
+						<div className="mb-3 text-sm">
+							Confidence Factor: <span className="font-mono">{result.starttls.confidenceFactor}</span>
+							{typeof result.starttls.maxScore === 'number' ? <> of <span className="font-mono">{result.starttls.maxScore}</span></> : null}
+						</div>
+					)}
 					{result.starttls.checks.length === 0 ? (
 						<p className="text-sm text-muted-foreground">No STARTTLS checks performed.</p>
 					) : (
@@ -171,6 +177,20 @@ export function DomainAnalysisView({ result }: DomainAnalysisViewProps) {
 										</tr>
 									</tbody>
 								</table>
+							</div>
+							<div className="space-y-2">
+								{result.starttls.checks.map((c, i) => (
+									<details key={`tx-${i}`} className="rounded border p-2 text-xs">
+										<summary className="cursor-pointer">
+											Transcript — {c.host}{c.answer ? ` [${c.answer}]` : ''}
+										</summary>
+										{(c.transcript && c.transcript.length) ? (
+											<pre className="mt-2 whitespace-pre-wrap">{c.transcript.join('\n')}</pre>
+										) : (
+											<div className="mt-2 text-muted-foreground">No transcript captured.</div>
+										)}
+									</details>
+								))}
 							</div>
 							{result.starttls.checks.map((c, i) => (
 								<div key={`issues-${i}`} className="text-xs">

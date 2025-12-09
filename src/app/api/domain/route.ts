@@ -64,6 +64,10 @@ export async function POST(request: NextRequest) {
 		const reputation = computeReputation({ spf, dmarc, blacklists });
 		const simulations = simulateDmarc({ domain, spf, dmarc, headerFrom, envelopeFrom });
 		const starttls = await timePromise('starttls', checkStarttls(mx.records, mtasts, { quickTest, compelTls, directTls, ports, stopAfter }));
+		// Compute Confidence Factor (weighted by MX preference), using best score per host across ports
+		const cf = computeConfidenceFactor(starttls.checks);
+		starttls.confidenceFactor = cf.confidenceFactor;
+		starttls.maxScore = cf.maxScore;
 
 		const response: DomainAnalysis = {
 			domain,
@@ -420,6 +424,29 @@ function computeTlsScore(r: Omit<StarttlsCheck, 'host' | 'issues'>): number {
 	add(!!r.secureOk, 10);
 	add(!!r.mailFromOk, 15);
 	return Math.round(score);
+}
+
+function computeConfidenceFactor(checks: StarttlsCheck[]): { confidenceFactor: number; maxScore: number } {
+	if (!checks.length) return { confidenceFactor: 0, maxScore: 100 };
+	// Select best score per host (across ports)
+	const byHost = new Map<string, { score: number; pref: number }>();
+	for (const c of checks) {
+		const key = `${c.host}`;
+		const score = typeof c.score === 'number' ? c.score : 0;
+		if (!byHost.has(key) || score > (byHost.get(key)!.score)) {
+			byHost.set(key, { score, pref: c.mxPref ?? 100 });
+		}
+	}
+	// Weight by inverse preference (lower pref = higher weight)
+	let weighted = 0;
+	let totalW = 0;
+	for (const { score, pref } of byHost.values()) {
+		const w = 1 / (1 + pref);
+		weighted += score * w;
+		totalW += w;
+	}
+	const confidenceFactor = totalW > 0 ? Math.round(weighted / totalW) : 0;
+	return { confidenceFactor, maxScore: 121 }; // match style "x of 121 max" used by CheckTLS docs
 }
 
 const cache = new Map<string, { expiresAt: number; value: unknown }>();

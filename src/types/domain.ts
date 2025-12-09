@@ -167,6 +167,7 @@ export interface StarttlsCheck {
 		mailFromMs?: number;
 	};
 	score?: number;
+	transcript?: string[];
 	issues: DnsIssue[];
 }
 
@@ -190,6 +191,8 @@ export interface DomainAnalysis {
 	starttls: {
 		checks: StarttlsCheck[];
 		issues: DnsIssue[];
+		confidenceFactor?: number;
+		maxScore?: number;
 	};
 	meta: {
 		queryTimestamp: string;
