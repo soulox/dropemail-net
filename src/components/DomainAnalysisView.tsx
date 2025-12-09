@@ -3,22 +3,13 @@
 import { DomainAnalysis } from '@/types/domain';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, XCircle, AlertCircle, Info, Shield, Globe, Lock, Mail } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertCircle, Info, Shield, Lock, Mail } from 'lucide-react';
 
 interface DomainAnalysisViewProps {
   analysis: DomainAnalysis;
 }
 
 export function DomainAnalysisView({ analysis }: DomainAnalysisViewProps) {
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'error': return 'destructive';
-      case 'warning': return 'default';
-      case 'info': return 'secondary';
-      default: return 'secondary';
-    }
-  };
-
   const getSeverityIcon = (severity: string) => {
     switch (severity) {
       case 'error': return <XCircle className="h-4 w-4" />;
