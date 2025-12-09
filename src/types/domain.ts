@@ -166,6 +166,7 @@ export interface StarttlsCheck {
 		tlsHandshakeMs?: number;
 		mailFromMs?: number;
 	};
+	transcript?: string[];
 	score?: number;
 	issues: DnsIssue[];
 }
