@@ -303,17 +303,17 @@ async function smtpStarttlsProbe(
 				secure.once('secureConnect', async () => {
 					timings.tlsHandshakeMs = Date.now() - t2;
 					result.tlsEstablished = true;
-				const proto = secure.getProtocol();
-				const cipher = secure.getCipher();
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				const cert: any = secure.getPeerCertificate();
-				result.tlsProtocol = proto || undefined;
-				result.cipher = cipher?.name;
-				result.certSubjectCN = cert?.subject?.CN;
-				result.certValidFrom = cert?.valid_from;
-				result.certValidTo = cert?.valid_to;
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				result.certAuthorized = (secure as any).authorized ?? false;
+					const proto = secure.getProtocol();
+					const cipher = secure.getCipher();
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					const cert: any = secure.getPeerCertificate();
+					result.tlsProtocol = proto || undefined;
+					result.cipher = cipher?.name;
+					result.certSubjectCN = cert?.subject?.CN;
+					result.certValidFrom = cert?.valid_from;
+					result.certValidTo = cert?.valid_to;
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					result.certAuthorized = (secure as any).authorized ?? false;
 					// Secure OK: TLS >= 1.2 and PFS cipher
 					const pfs = (result.cipher || '').toUpperCase().includes('ECDHE') || (result.cipher || '').toUpperCase().includes('DHE');
 					const v = (result.tlsProtocol || '').toUpperCase();
