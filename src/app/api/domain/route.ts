@@ -190,6 +190,7 @@ async function checkStarttls(
 					mtastsOk,
 					daneOk,
 					score,
+					issues: [],
 				});
 			} catch (e) {
 				checks.push({
