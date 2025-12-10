@@ -85,10 +85,37 @@ Before committing:
 
 ## Deployment
 
-Cloudflare Workers will:
-1. Build using `npm run build`
-2. Use environment variables from Cloudflare Dashboard (or wrangler.jsonc defaults)
-3. Deploy the `.open-next/` output directory
+### Environment Variables Deployment
 
-Ensure all environment variables are set in Cloudflare Dashboard for production.
+**For Cloudflare Workers (using Wrangler CLI):**
+- ✅ Variables in `wrangler.jsonc` under `vars` are **automatically deployed**
+- When you run `npm run deploy` or `wrangler deploy`, all variables from `wrangler.jsonc` are included
+- **No manual setup needed** - the variables are part of the deployment
+
+**For Cloudflare Pages (via Dashboard/GitHub):**
+- ⚠️ Variables need to be set **manually** in Cloudflare Dashboard
+- Go to: Workers & Pages → Your Project → Settings → Environment Variables
+- Add each variable from `wrangler.jsonc` manually
+- Or use `wrangler pages secret put` command for sensitive values
+
+**Current Setup:**
+Your project uses `wrangler versions upload`, which means:
+- Variables from `wrangler.jsonc` are **automatically included** in deployment
+- Default values will be used if not overridden in Dashboard
+- You can override specific values in Cloudflare Dashboard if needed
+
+### Recommended Approach
+
+1. **Default values** in `wrangler.jsonc` work automatically ✅
+2. **Override in Dashboard** only if you need different production values
+3. **Sensitive values** (like API keys) should be set as secrets in Dashboard
+
+### Setting Variables in Cloudflare Dashboard (Optional Override)
+
+If you want to override defaults:
+1. Go to Cloudflare Dashboard
+2. Navigate to: Workers & Pages → Your Project → Settings
+3. Click "Variables" tab
+4. Add/Edit variables as needed
+5. These will override `wrangler.jsonc` values
 
