@@ -1,26 +1,34 @@
 /**
- * Site configuration - uses environment variables for dynamic configuration
- * Set these in Cloudflare dashboard or wrangler.jsonc
+ * Site configuration - only domain name is dynamic via environment variable
+ * Set SITE_DOMAIN in Cloudflare dashboard or wrangler.jsonc
  */
 
 // ============================================================================
-// Branding & Identity
+// Domain Configuration (ONLY dynamic value)
 // ============================================================================
 
-// Site name (e.g., "SafeCleanEmails")
-export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || process.env.SITE_NAME || 'SafeCleanEmails';
-
-// Site domain (e.g., "safecleanemails.com")
+// Site domain (e.g., "safecleanemails.com") - ONLY value from environment variable
 export const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN || process.env.SITE_DOMAIN || 'safecleanemails.com';
 
-// Site URL (full URL with protocol)
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || `https://${SITE_DOMAIN}`;
+// ============================================================================
+// Derived Values (computed from domain)
+// ============================================================================
 
-// Site display name (formatted version)
-export const SITE_DISPLAY_NAME = `${SITE_NAME}.com`;
+// Site URL (full URL with protocol) - derived from domain
+export const SITE_URL = `https://${SITE_DOMAIN}`;
 
-// Twitter handle (optional)
-export const TWITTER_HANDLE = process.env.NEXT_PUBLIC_TWITTER_HANDLE || process.env.TWITTER_HANDLE || '@safecleanemails';
+// Site name - derived from domain (removes .com and capitalizes)
+export const SITE_NAME = SITE_DOMAIN
+  .replace(/\.(com|net|org|io|co|dev)$/i, '')
+  .split(/[-.]/)
+  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+  .join('');
+
+// Site display name (formatted version) - derived from domain
+export const SITE_DISPLAY_NAME = SITE_DOMAIN;
+
+// Twitter handle - derived from domain
+export const TWITTER_HANDLE = `@${SITE_DOMAIN.replace(/\.(com|net|org|io|co|dev)$/i, '')}`;
 
 // ============================================================================
 // Analytics & Tracking
@@ -39,11 +47,11 @@ export const API_VERSION = process.env.API_VERSION || '1.2.0';
 // SMTP Probe Hostname (used in EHLO commands)
 export const SMTP_PROBE_HOSTNAME = process.env.SMTP_PROBE_HOSTNAME || 'probe.dropemail';
 
-// Page Title
-export const PAGE_TITLE = process.env.NEXT_PUBLIC_PAGE_TITLE || process.env.PAGE_TITLE || 'Email Security Analyzer';
+// Page Title - hardcoded
+export const PAGE_TITLE = 'Email Security Analyzer';
 
-// Page Description
-export const PAGE_DESCRIPTION = process.env.NEXT_PUBLIC_PAGE_DESCRIPTION || process.env.PAGE_DESCRIPTION || 'Analyze email headers or domain security configuration';
+// Page Description - hardcoded
+export const PAGE_DESCRIPTION = 'Analyze email headers or domain security configuration';
 
 // ============================================================================
 // Timeouts & Performance

@@ -17,17 +17,10 @@
   "upload_source_maps": true,
   "vars": {
     // ============================================================================
-    // Branding & Identity
+    // Domain Configuration (ONLY dynamic variable)
     // ============================================================================
-    "SITE_NAME": "SafeCleanEmails",
     "SITE_DOMAIN": "safecleanemails.com",
-    "SITE_URL": "https://safecleanemails.com",
-    "TWITTER_HANDLE": "@safecleanemails",
-    // Client-side (NEXT_PUBLIC_ prefix required for browser access)
-    "NEXT_PUBLIC_SITE_NAME": "SafeCleanEmails",
     "NEXT_PUBLIC_SITE_DOMAIN": "safecleanemails.com",
-    "NEXT_PUBLIC_SITE_URL": "https://safecleanemails.com",
-    "NEXT_PUBLIC_TWITTER_HANDLE": "@safecleanemails",
     
     // ============================================================================
     // Analytics & Tracking
@@ -40,11 +33,6 @@
     // ============================================================================
     "API_VERSION": "1.2.0",
     "SMTP_PROBE_HOSTNAME": "probe.dropemail",
-    "PAGE_TITLE": "Email Security Analyzer",
-    "PAGE_DESCRIPTION": "Analyze email headers or domain security configuration",
-    // Client-side versions
-    "NEXT_PUBLIC_PAGE_TITLE": "Email Security Analyzer",
-    "NEXT_PUBLIC_PAGE_DESCRIPTION": "Analyze email headers or domain security configuration",
     
     // ============================================================================
     // Timeouts & Performance (milliseconds)
