@@ -45,6 +45,8 @@
     "pages:build": "npx @opennextjs/cloudflare build",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv env.d.ts",
     "check": "npm run build && tsc",
+    "validate": "node scripts/validate-cloudflare-compat.js",
+    "prebuild": "npm run validate",
     "deploy": "npm run pages:build && npx wrangler versions upload",
     "dev": "next dev",
     "lint": "next lint",

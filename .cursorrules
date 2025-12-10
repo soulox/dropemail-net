@@ -1,0 +1,145 @@
+# Cloudflare Workers Compatibility Rules
+
+This project is deployed on Cloudflare Workers using Next.js with OpenNext. All code changes MUST adhere to the following rules to ensure successful deployment and runtime compatibility.
+
+## Environment Variables
+
+1. **Always use fallback defaults**: All environment variables MUST have fallback values to prevent runtime errors
+   ```typescript
+   // ✅ GOOD
+   const VALUE = process.env.VAR_NAME || 'default';
+   const NUM = parseInt(String(process.env.NUM || '100'), 10) || 100;
+   
+   // ❌ BAD
+   const VALUE = process.env.VAR_NAME; // May be undefined
+   ```
+
+2. **Client vs Server variables**: 
+   - Client-side code MUST use `NEXT_PUBLIC_` prefix
+   - Server-side code can use either prefix, but prefer non-prefixed for server-only vars
+   - Always check both: `process.env.NEXT_PUBLIC_VAR || process.env.VAR || 'default'`
+
+3. **Centralize configuration**: All environment variables MUST be defined in `src/lib/site-config.ts`
+
+## Node.js API Compatibility
+
+1. **Use Node.js built-ins carefully**: Cloudflare Workers support Node.js compatibility mode, but:
+   - ✅ Use `node:dns/promises` for DNS operations
+   - ✅ Use `node:net` and `node:tls` for SMTP connections
+   - ✅ Use `node:fs` is NOT available - use fetch/API routes instead
+   - ✅ Use `node:path` is available but prefer URL APIs when possible
+
+2. **Runtime detection**: When using Node.js APIs, ensure they're available:
+   ```typescript
+   // ✅ GOOD - Check runtime
+   export const runtime = 'nodejs';
+   ```
+
+3. **Avoid blocking operations**: Cloudflare Workers have execution time limits:
+   - ✅ Use async/await for all I/O operations
+   - ✅ Set appropriate timeouts (use config from site-config.ts)
+   - ❌ Avoid synchronous file operations
+   - ❌ Avoid long-running loops
+
+## Build Requirements
+
+1. **Build must succeed**: Every commit MUST pass `npm run build` without errors
+
+2. **Type safety**: All TypeScript types MUST be correct - no `any` types without justification
+
+3. **Import paths**: Always use `@/` alias for imports from `src/` directory
+
+4. **No dynamic imports of Node.js modules**: Use static imports only
+
+## API Routes
+
+1. **Route handlers**: All API routes MUST:
+   - Export named functions (`GET`, `POST`, etc.) or default export
+   - Use `NextRequest` and `NextResponse` from `next/server`
+   - Set `export const runtime = 'nodejs'` if using Node.js APIs
+   - Handle errors gracefully with try/catch
+
+2. **Timeouts**: Always use timeout values from `site-config.ts`:
+   - DNS operations: `DNS_TIMEOUT_MS`
+   - HTTP requests: `FETCH_TIMEOUT_MS`
+   - SMTP connections: `SMTP_TIMEOUT_MS`
+
+3. **Caching**: Use the cache utilities with TTL from `site-config.ts`:
+   - Default cache: `DEFAULT_CACHE_TTL_MS`
+   - Geo cache: `GEO_CACHE_TTL_MS`
+   - DNSBL cache: `DNSBL_CACHE_TTL_MS`
+
+## External Services
+
+1. **API URLs**: External service URLs MUST be configurable via environment variables
+   - Define in `site-config.ts`
+   - Add to `wrangler.jsonc` with defaults
+   - Support placeholder replacement (e.g., `{ip}` in geolocation URL)
+
+2. **Error handling**: All external API calls MUST:
+   - Have timeout protection
+   - Use retry logic with configurable retry count/delay
+   - Return fallback values on failure (never throw unhandled errors)
+
+## Configuration Management
+
+1. **Centralized config**: All configuration MUST be in `src/lib/site-config.ts`
+   - Export constants, not functions (for build-time optimization)
+   - Group related settings with section comments
+   - Document each variable with comments
+
+2. **Wrangler sync**: All environment variables in `site-config.ts` MUST be:
+   - Added to `wrangler.jsonc` with default values
+   - Organized by category with comments
+   - Include both `NEXT_PUBLIC_` and non-prefixed versions where needed
+
+## Client Components
+
+1. **'use client' directive**: Client components MUST have `'use client'` at the top
+2. **Environment variables**: Client components can ONLY access `NEXT_PUBLIC_*` variables
+3. **No server APIs**: Client components MUST NOT import Node.js modules directly
+
+## Server Components
+
+1. **Metadata**: Server components can use any environment variables
+2. **Static generation**: Prefer static generation when possible (`export const dynamic = 'force-static'`)
+3. **Metadata exports**: Use `export const metadata` for SEO and OpenGraph data
+
+## Testing Before Deployment
+
+Before pushing changes, verify:
+1. ✅ `npm run build` succeeds without errors
+2. ✅ No TypeScript errors (`npm run type-check` if available)
+3. ✅ No linting errors (`npm run lint` if available)
+4. ✅ All environment variables have fallback defaults
+5. ✅ All imports use `@/` alias
+6. ✅ No Node.js APIs used that aren't supported in Workers
+
+## Common Pitfalls to Avoid
+
+1. ❌ Don't use `fs.readFileSync` or `fs.writeFileSync`
+2. ❌ Don't use `process.cwd()` or `__dirname` (use relative paths or config)
+3. ❌ Don't assume file system access
+4. ❌ Don't use blocking operations without timeouts
+5. ❌ Don't hardcode URLs or configuration values
+6. ❌ Don't use `require()` for dynamic imports
+7. ❌ Don't access environment variables without fallbacks
+
+## Code Review Checklist
+
+When reviewing code, check:
+- [ ] All env vars have fallbacks
+- [ ] Timeouts are used for all I/O operations
+- [ ] Error handling is present
+- [ ] No Node.js APIs that aren't supported
+- [ ] Configuration is centralized in site-config.ts
+- [ ] wrangler.jsonc is updated if new vars added
+- [ ] Build succeeds locally
+- [ ] Client/server boundaries are respected
+
+## References
+
+- Cloudflare Workers Docs: https://developers.cloudflare.com/workers/
+- OpenNext Cloudflare: https://opennext.js.org/cloudflare
+- Next.js on Cloudflare: https://developers.cloudflare.com/pages/framework-guides/nextjs/
+
