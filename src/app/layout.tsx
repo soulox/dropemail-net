@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { ToastProvider } from "@/components/ui/toast";
+import { SITE_NAME, SITE_URL, SITE_DISPLAY_NAME, TWITTER_HANDLE } from "@/lib/site-config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,10 +16,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://safecleanemails.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Email Header Analyzer - SafeCleanEmails.com",
-    template: "%s | SafeCleanEmails.com",
+    default: `Email Header Analyzer - ${SITE_DISPLAY_NAME}`,
+    template: `%s | ${SITE_DISPLAY_NAME}`,
   },
   description:
     "Analyze email headers for SPF, DKIM, DMARC, ARC, routing hops, TLS, spam score, and security insights.",
@@ -47,13 +48,13 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://safecleanemails.com/",
+    canonical: `${SITE_URL}/`,
   },
   openGraph: {
     type: "website",
-    url: "https://safecleanemails.com/",
-    siteName: "SafeCleanEmails.com",
-    title: "Email Header Analyzer - SafeCleanEmails.com",
+    url: `${SITE_URL}/`,
+    siteName: SITE_DISPLAY_NAME,
+    title: `Email Header Analyzer - ${SITE_DISPLAY_NAME}`,
     description:
       "Parse and analyze email headers to verify SPF, DKIM, DMARC, and visualize routing with security insights.",
     images: [
@@ -61,16 +62,16 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "SafeCleanEmails.com - Email Header Analyzer",
+        alt: `${SITE_DISPLAY_NAME} - Email Header Analyzer`,
       },
     ],
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    site: "@safecleanemails",
-    creator: "@safecleanemails",
-    title: "Email Header Analyzer - SafeCleanEmails.com",
+    site: TWITTER_HANDLE,
+    creator: TWITTER_HANDLE,
+    title: `Email Header Analyzer - ${SITE_DISPLAY_NAME}`,
     description:
       "Analyze email headers (SPF, DKIM, DMARC) and routing with a modern UI.",
     images: ["/og-image.png"],
@@ -84,8 +85,8 @@ export const metadata: Metadata = {
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   category: "technology",
-  authors: [{ name: "SafeCleanEmails.com" }],
-  applicationName: "SafeCleanEmails Email Header Analyzer",
+  authors: [{ name: SITE_DISPLAY_NAME }],
+  applicationName: `${SITE_NAME} Email Header Analyzer`,
 };
 
 export default function RootLayout({
@@ -103,8 +104,8 @@ export default function RootLayout({
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'WebApplication',
-              name: 'SafeCleanEmails Email Header Analyzer',
-              url: 'https://safecleanemails.com',
+              name: `${SITE_NAME} Email Header Analyzer`,
+              url: SITE_URL,
               applicationCategory: 'SecurityApplication',
               operatingSystem: 'Web',
               description:
@@ -116,8 +117,8 @@ export default function RootLayout({
               },
               creator: {
                 '@type': 'Organization',
-                name: 'SafeCleanEmails.com',
-                url: 'https://safecleanemails.com',
+                name: SITE_DISPLAY_NAME,
+                url: SITE_URL,
               },
             }),
           }}

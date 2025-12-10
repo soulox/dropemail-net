@@ -8,6 +8,7 @@ import { DomainAnalysisView } from '@/components/DomainAnalysisView';
 import { parseEmailFile, parseEmailText } from '@/lib/email-parser';
 import { EmailAnalysis } from '@/types/email';
 import { DomainAnalysis } from '@/types/domain';
+import { PAGE_TITLE, PAGE_DESCRIPTION } from '@/lib/site-config';
 import { AlertCircle, Mail, Globe } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -106,10 +107,10 @@ export default function Home() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Email Security Analyzer
+            {PAGE_TITLE}
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Analyze email headers or domain security configuration
+            {PAGE_DESCRIPTION}
           </p>
         </div>
 

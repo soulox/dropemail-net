@@ -4,10 +4,10 @@ import net from 'node:net';
 import tls from 'node:tls';
 import { z } from 'zod';
 import { DomainAnalysis, DmarcResult, DkimResult, SpfResult, DnsIssue, BimiResult, MtastsResult, TlsRptResult, DkimDiscoveryResult, BlacklistResults, ReputationSummary, MxRecordInfo, DnsblListing, SimulationResults, DmarcScenarioOutcome, StarttlsCheck } from '@/types/domain';
+import { API_VERSION, SMTP_PROBE_HOSTNAME, DNS_TIMEOUT_MS, FETCH_TIMEOUT_MS, SMTP_TIMEOUT_MS, GEOLOCATION_API_URL, DEFAULT_CACHE_TTL_MS, GEO_CACHE_TTL_MS, DNSBL_CACHE_TTL_MS, DEFAULT_RETRY_COUNT, DEFAULT_RETRY_DELAY_MS } from '@/lib/site-config';
 
 export const runtime = 'nodejs';
-const API_VERSION = '1.2.0';
-const TIMEOUTS = { dnsMs: 3000, fetchMs: 5000, smtpMs: 4000 };
+const TIMEOUTS = { dnsMs: DNS_TIMEOUT_MS, fetchMs: FETCH_TIMEOUT_MS, smtpMs: SMTP_TIMEOUT_MS };
 
 const BodySchema = z.object({
 	domain: z.string().trim().min(1).regex(/^[a-z0-9.-]+\.[a-z]{2,}$/i, 'Invalid domain'),
@@ -274,8 +274,8 @@ async function smtpStarttlsProbe(
 				push(`<-- ${banner.trim()}`);
 				timings.connectMs = Date.now() - t0;
 				result.connectOk = true;
-				socket!.write(`EHLO probe.dropemail\r\n`);
-				push(`--> EHLO probe.dropemail`);
+				socket!.write(`EHLO ${SMTP_PROBE_HOSTNAME}\r\n`);
+				push(`--> EHLO ${SMTP_PROBE_HOSTNAME}`);
 				const t1 = Date.now();
 				const ehloResp = await until(socket!, /^250[ -]/m, timeoutMs);
 				push(`<-- ${ehloResp.trim()}`);
@@ -327,8 +327,8 @@ async function smtpStarttlsProbe(
 					}
 					// Post-TLS EHLO and MAIL FROM
 					try {
-						secure.write(`EHLO probe.dropemail\r\n`);
-						push(`~~> EHLO probe.dropemail`);
+					secure.write(`EHLO ${SMTP_PROBE_HOSTNAME}\r\n`);
+					push(`~~> EHLO ${SMTP_PROBE_HOSTNAME}`);
 						const ehlo2 = await until(secure as unknown as net.Socket, /^250[ -]/m, timeoutMs);
 						push(`<~~ ${ehlo2.trim()}`);
 						if (options?.stopAfter === 'EHLO2') {
@@ -384,7 +384,7 @@ async function smtpStarttlsProbe(
 				const modern = v.includes('TLSV1.3') || v.includes('TLSV1.2');
 				result.secureOk = pfs && modern;
 				// EHLO
-				secure.write(`EHLO probe.dropemail\r\n`);
+				secure.write(`EHLO ${SMTP_PROBE_HOSTNAME}\r\n`);
 				await until(secure as unknown as net.Socket, /^250[ -]/m, timeoutMs);
 				result.heloOk = true;
 				if (options?.stopAfter === 'EHLO2') {
@@ -432,7 +432,7 @@ function getCached<T>(key: string): T | undefined {
 	}
 	return entry.value as T;
 }
-function setCached<T>(key: string, value: T, ttlMs = 10 * 60 * 1000) {
+function setCached<T>(key: string, value: T, ttlMs = DEFAULT_CACHE_TTL_MS) {
 	cache.set(key, { value, expiresAt: Date.now() + ttlMs });
 }
 
@@ -450,7 +450,7 @@ async function resolveMxWithGeo(domain: string, mxHostLimit?: number): Promise<D
 				let addresses = getCached<string[]>(key);
 				if (!addresses) {
 					addresses = await dnsResolve4Safe(r.exchange);
-					setCached(key, addresses, 10 * 60 * 1000);
+					setCached(key, addresses, DEFAULT_CACHE_TTL_MS);
 				}
 				item.addresses = addresses;
 				if (addresses.length > 0) {
@@ -459,8 +459,8 @@ async function resolveMxWithGeo(domain: string, mxHostLimit?: number): Promise<D
 							// eslint-disable-next-line @typescript-eslint/no-explicit-any
 							let geo = getCached<any>(gk);
 							if (!geo) {
-								geo = await retryOperation(() => geolocateIp(ip), 2, 250);
-								setCached(gk, geo, 60 * 60 * 1000);
+								geo = await retryOperation(() => geolocateIp(ip), DEFAULT_RETRY_COUNT, DEFAULT_RETRY_DELAY_MS);
+								setCached(gk, geo, GEO_CACHE_TTL_MS);
 							}
 							return { ip, ...geo };
 						});
@@ -843,7 +843,7 @@ async function resolveMtasts(domain: string): Promise<MtastsResult> {
 	let policy: MtastsResult['policy'];
 	try {
 		const url = `https://mta-sts.${domain}/.well-known/mta-sts.txt`;
-		const res = await retryOperation(() => fetchWithTimeout(url, TIMEOUTS.fetchMs), 2, 300);
+		const res = await retryOperation(() => fetchWithTimeout(url, TIMEOUTS.fetchMs), DEFAULT_RETRY_COUNT, DEFAULT_RETRY_DELAY_MS);
 		if (res.ok) {
 			const text = await res.text();
 			const lines = text
@@ -951,9 +951,9 @@ async function geolocateIp(ip: string): Promise<{
 	longitude?: number;
 }> {
 	// Try cache-aware fetch
-	const url = `https://ipapi.co/${ip}/json/`;
+	const url = GEOLOCATION_API_URL.replace('{ip}', ip);
 	try {
-		const res = await retryOperation(() => fetchWithTimeout(url, TIMEOUTS.fetchMs), 1, 250);
+		const res = await retryOperation(() => fetchWithTimeout(url, TIMEOUTS.fetchMs), DEFAULT_RETRY_COUNT, DEFAULT_RETRY_DELAY_MS);
 		if (!res.ok) return {};
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const j = (await res.json()) as any;
@@ -1004,7 +1004,7 @@ async function resolveBlacklists(domain: string, mxRecords: MxRecordInfo[]): Pro
 			let result = getCached<{ listed: boolean; responseCode?: string }>(key);
 			if (result === undefined) {
 				result = await dnsblListed(host);
-				setCached(key, result, 10 * 60 * 1000);
+				setCached(key, result, DNSBL_CACHE_TTL_MS);
 			}
 			const message = result.listed 
 				? (result.responseCode ? `Listed (${result.responseCode})` : 'Listed')
@@ -1025,7 +1025,7 @@ async function resolveBlacklists(domain: string, mxRecords: MxRecordInfo[]): Pro
 				let result = getCached<{ listed: boolean; responseCode?: string }>(key);
 				if (result === undefined) {
 					result = await dnsblListed(host);
-					setCached(key, result, 10 * 60 * 1000);
+					setCached(key, result, DNSBL_CACHE_TTL_MS);
 				}
 				const message = result.listed 
 					? (result.responseCode ? `Listed (${result.responseCode})` : 'Listed')
@@ -1106,7 +1106,7 @@ function toDnsError(e: any): string {
 	return String(e);
 }
 
-async function retryOperation<T>(op: () => Promise<T>, retries = 2, baseDelayMs = 200): Promise<T> {
+async function retryOperation<T>(op: () => Promise<T>, retries = DEFAULT_RETRY_COUNT, baseDelayMs = DEFAULT_RETRY_DELAY_MS): Promise<T> {
 	let lastErr: unknown;
 	for (let i = 0; i <= retries; i++) {
 		try {
@@ -1130,16 +1130,16 @@ async function withTimeout<T>(p: Promise<T>, timeoutMs: number): Promise<T> {
 }
 
 async function dnsResolveTxt(name: string): Promise<string[][]> {
-	return await retryOperation(() => withTimeout(dns.resolveTxt(name), TIMEOUTS.dnsMs), 2, 200);
+	return await retryOperation(() => withTimeout(dns.resolveTxt(name), TIMEOUTS.dnsMs), DEFAULT_RETRY_COUNT, DEFAULT_RETRY_DELAY_MS);
 }
 
 async function dnsResolveMx(name: string): Promise<Awaited<ReturnType<typeof dns.resolveMx>>> {
-	return await retryOperation(() => withTimeout(dns.resolveMx(name), TIMEOUTS.dnsMs), 2, 200);
+	return await retryOperation(() => withTimeout(dns.resolveMx(name), TIMEOUTS.dnsMs), DEFAULT_RETRY_COUNT, DEFAULT_RETRY_DELAY_MS);
 }
 
 async function dnsResolve4Safe(name: string): Promise<string[]> {
 	try {
-		return await retryOperation(() => withTimeout(dns.resolve4(name), TIMEOUTS.dnsMs), 2, 200);
+		return await retryOperation(() => withTimeout(dns.resolve4(name), TIMEOUTS.dnsMs), DEFAULT_RETRY_COUNT, DEFAULT_RETRY_DELAY_MS);
 	} catch {
 		return [];
 	}

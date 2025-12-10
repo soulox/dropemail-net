@@ -2,6 +2,7 @@
 
 import { Mail, Shield, Search } from 'lucide-react';
 import Link from 'next/link';
+import { SITE_NAME, SITE_DOMAIN } from '@/lib/site-config';
 
 export function Header() {
   return (
@@ -18,10 +19,10 @@ export function Header() {
             </div>
             <div className="flex flex-col">
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                SafeCleanEmails
+                {SITE_NAME}
               </h1>
               <span className="text-xs text-gray-500 dark:text-gray-400 font-mono -mt-1">
-                safecleanemails.com
+                {SITE_DOMAIN}
               </span>
             </div>
           </Link>

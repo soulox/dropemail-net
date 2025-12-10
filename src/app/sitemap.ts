@@ -1,11 +1,11 @@
 import type { MetadataRoute } from 'next'
+import { SITE_URL } from '@/lib/site-config'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = 'https://safecleanemails.com'
   const now = new Date()
   return [
     {
-      url: `${base}/`,
+      url: `${SITE_URL}/`,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 1.0,
