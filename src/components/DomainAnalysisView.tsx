@@ -297,7 +297,7 @@ export function DomainAnalysisView({ analysis }: DomainAnalysisViewProps) {
                     <div key={i} className="flex items-center justify-between text-sm">
                       <span>{listing.list}</span>
                       <Badge variant={listing.listed ? 'destructive' : 'default'}>
-                        {listing.listed ? 'Listed' : 'Clean'}
+                        {listing.listed ? (listing.responseCode ? `Listed (${listing.responseCode})` : 'Listed') : 'Clean'}
                       </Badge>
                     </div>
                   ))}
@@ -315,7 +315,7 @@ export function DomainAnalysisView({ analysis }: DomainAnalysisViewProps) {
                         <div key={i} className="flex items-center justify-between text-sm">
                           <span>{listing.list}</span>
                           <Badge variant={listing.listed ? 'destructive' : 'default'}>
-                            {listing.listed ? 'Listed' : 'Clean'}
+                            {listing.listed ? (listing.responseCode ? `Listed (${listing.responseCode})` : 'Listed') : 'Clean'}
                           </Badge>
                         </div>
                       ))}

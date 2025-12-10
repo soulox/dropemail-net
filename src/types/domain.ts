@@ -104,6 +104,7 @@ export interface DnsblListing {
 	list: string;
 	type: 'ip' | 'domain';
 	listed: boolean;
+	responseCode?: string; // e.g., "127.0.0.2" for Spamhaus SBL
 	message?: string;
 }
 

@@ -974,20 +974,42 @@ async function geolocateIp(ip: string): Promise<{
 
 async function resolveBlacklists(domain: string, mxRecords: MxRecordInfo[]): Promise<BlacklistResults> {
 	const issues: DnsIssue[] = [];
-	const domainLists = ['dbl.spamhaus.org'];
-	const ipLists = ['zen.spamhaus.org', 'b.barracudacentral.org'];
+	// Domain blacklists - reputable and commonly used
+	const domainLists = [
+		'dbl.spamhaus.org',           // Spamhaus Domain Block List
+		'multi.surbl.org',            // SURBL Multi
+		'uribl.com',                  // URIBL
+	];
+	// IP blacklists - reputable and commonly used (matching standard blacklist checkers)
+	// Note: Using individual Spamhaus lists + ZEN for comprehensive coverage
+	const ipLists = [
+		'zen.spamhaus.org',           // Spamhaus ZEN (combines SBL, XBL, PBL) - most comprehensive
+		'sbl.spamhaus.org',           // Spamhaus Spam Block List
+		'xbl.spamhaus.org',           // Spamhaus Exploits Block List
+		'pbl.spamhaus.org',           // Spamhaus Policy Block List
+		'b.barracudacentral.org',     // Barracuda
+		'bl.spamcop.net',             // SpamCop
+		'dnsbl.sorbs.net',            // SORBS
+		'bl.spamrats.com',            // SpamRATS
+		'ips.backscatterer.org',      // Backscatterer
+		'bl.blocklist.de',            // blocklist.de
+		'dnsbl-1.uceprotect.net',     // UCEPROTECT Level 1 (Level 2/3 removed - too aggressive)
+	];
 
 	// Domain checks
 	const domainResults: DnsblListing[] = await Promise.all(
 		domainLists.map(async (list) => {
 			const host = `${domain}.${list}`;
 			const key = `rbl:domain:${host}`;
-			let listed = getCached<boolean>(key);
-			if (listed === undefined) {
-				listed = await dnsblListed(host);
-				setCached(key, listed, 10 * 60 * 1000);
+			let result = getCached<{ listed: boolean; responseCode?: string }>(key);
+			if (result === undefined) {
+				result = await dnsblListed(host);
+				setCached(key, result, 10 * 60 * 1000);
 			}
-			return { list, type: 'domain', listed, message: listed ? 'Listed' : 'Not listed' };
+			const message = result.listed 
+				? (result.responseCode ? `Listed (${result.responseCode})` : 'Listed')
+				: 'Not listed';
+			return { list, type: 'domain', listed: result.listed, responseCode: result.responseCode, message };
 		}),
 	);
 
@@ -1000,12 +1022,15 @@ async function resolveBlacklists(domain: string, mxRecords: MxRecordInfo[]): Pro
 				const reversed = ip.split('.').reverse().join('.');
 				const host = `${reversed}.${list}`;
 				const key = `rbl:ip:${host}`;
-				let listed = getCached<boolean>(key);
-				if (listed === undefined) {
-					listed = await dnsblListed(host);
-					setCached(key, listed, 10 * 60 * 1000);
+				let result = getCached<{ listed: boolean; responseCode?: string }>(key);
+				if (result === undefined) {
+					result = await dnsblListed(host);
+					setCached(key, result, 10 * 60 * 1000);
 				}
-				listings.push({ list, type: 'ip', listed, message: listed ? 'Listed' : 'Not listed' });
+				const message = result.listed 
+					? (result.responseCode ? `Listed (${result.responseCode})` : 'Listed')
+					: 'Not listed';
+				listings.push({ list, type: 'ip', listed: result.listed, responseCode: result.responseCode, message });
 			}
 			ips[ip] = listings;
 		});
@@ -1013,14 +1038,18 @@ async function resolveBlacklists(domain: string, mxRecords: MxRecordInfo[]): Pro
 	return { domain: domainResults, ips, issues };
 }
 
-async function dnsblListed(host: string): Promise<boolean> {
+async function dnsblListed(host: string): Promise<{ listed: boolean; responseCode?: string }> {
 	try {
 		const addrs = await withTimeout(dns.resolve4(host), TIMEOUTS.dnsMs);
 		// If we got any A records, consider as listed
-		return addrs && addrs.length > 0;
+		// Capture the first response code (usually 127.0.0.x format)
+		if (addrs && addrs.length > 0) {
+			return { listed: true, responseCode: addrs[0] };
+		}
+		return { listed: false };
 	} catch {
 		// NXDOMAIN or SERVFAIL => treat as not listed
-		return false;
+		return { listed: false };
 	}
 }
 
